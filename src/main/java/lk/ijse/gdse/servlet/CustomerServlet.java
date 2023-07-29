@@ -43,7 +43,9 @@ public class CustomerServlet extends HttpServlet {
         System.out.println("do-post");
         if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
             resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-        } else {
+
+        }
+
             try {
                 Jsonb jsonb = JsonbBuilder.create();
                 CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
@@ -57,17 +59,15 @@ public class CustomerServlet extends HttpServlet {
                 if(ps.executeUpdate() < 1){
                     System.out.println("failed");
                 }
-                ResultSet rst = ps.getGeneratedKeys();
-                rst.next();
-                resp.setStatus(HttpServletResponse.SC_CREATED);
+
                 //the created json is sent to frontend
                 resp.setContentType("application/json");
                 jsonb.toJson(customerDto,resp.getWriter());
 
             } catch (SQLException | RuntimeException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
-        }
+
     }
 
 }

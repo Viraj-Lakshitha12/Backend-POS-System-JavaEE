@@ -1,6 +1,5 @@
 package lk.ijse.gdse.filter;
 
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebFilter;
@@ -15,8 +14,8 @@ public class CORSFilter extends HttpFilter {
     protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException, ServletException {
         System.out.println("CORS filter");
         String origin = req.getHeader("Origin");
-
-        if(origin.contains("http://localhost:63342")){
+        System.out.println(origin.toLowerCase());
+        if(origin.contains("http://localhost:5500")){
             System.out.println("CORS filter accepted");
             res.setHeader("Access-Control-Allow-Origin",origin);
             res.setHeader("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,HEADER");
