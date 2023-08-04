@@ -19,55 +19,70 @@ import java.util.regex.Pattern;
 @WebServlet(urlPatterns = "/customer")
 public class CustomerServlet extends HttpServlet {
 
-
     Connection connection;
-    String sql = "INSERT INTO customer(id,name,address,salary) VALUES (?,?,?,?)";
+    private final String sql = "INSERT INTO customer VALUES (?,?,?,?)";
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/thogakade";
+    private static final String DB_USER = "root";
+    private static final String DB_PASS = "1234";
 
-    @Override
-    public void init() throws ServletException {
-
-        try {
-            InitialContext ctx = new InitialContext();
-            DataSource pool = (DataSource) ctx.lookup("java:comp/env/jdbc/student");
-            this.connection = pool.getConnection();
-
-
-        } catch (NamingException | SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         System.out.println("do-post");
-        if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
-            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection =  DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+            System.out.println("oky");
 
-        }
+            Jsonb jsonb = JsonbBuilder.create();
+            CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
 
-            try {
-                Jsonb jsonb = JsonbBuilder.create();
-                CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
-
-                PreparedStatement ps = connection.prepareStatement(sql);
-                ps.setString(1,customerDto.getId());
-                ps.setString(2,customerDto.getName());
-                ps.setString(3,customerDto.getAddress());
-                ps.setDouble(4,customerDto.getSalary());
-
-                if(ps.executeUpdate() < 1){
-                    System.out.println("failed");
-                }
-
-                //the created json is sent to frontend
-                resp.setContentType("application/json");
-                jsonb.toJson(customerDto,resp.getWriter());
-
-            } catch (SQLException | RuntimeException e) {
-                System.out.println(e.getMessage());
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1,customerDto.getId());
+            ps.setString(2,customerDto.getName());
+            ps.setString(3,customerDto.getAddress());
+            ps.setDouble(4,customerDto.getSalary());
+            int i = ps.executeUpdate();
+            if (i>0){
+                System.out.println("added oky");
             }
+            System.out.println("added fail");
+
+        } catch (SQLException |ClassNotFoundException| RuntimeException e) {
+            e.printStackTrace();
+        }
+//        if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
+//            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+//
+//        }
+//
+//            try {
+//                Jsonb jsonb = JsonbBuilder.create();
+//                CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
+//
+//                PreparedStatement ps = connection.prepareStatement(sql);
+//                ps.setString(1,customerDto.getId());
+//                ps.setString(2,customerDto.getName());
+//                ps.setString(3,customerDto.getAddress());
+//                ps.setDouble(4,customerDto.getSalary());
+//                System.out.println("set oky");
+////                if(ps.executeUpdate() < 1){
+////                    System.out.println("failed");
+////                }
+////
+////                //the created json is sent to frontend
+////                resp.setContentType("application/json");
+////                jsonb.toJson(customerDto,resp.getWriter());
+//
+//            } catch (SQLException | RuntimeException e) {
+//                System.out.println(e.getMessage());
+//            }
 
     }
 
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("sdggf");
+    }
 }

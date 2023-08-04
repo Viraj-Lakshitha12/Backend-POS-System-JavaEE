@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="Pos-System-Backend-with-javaEE:Web exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/Pos_System_Backend_with_javaEE_Web_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="Pos-System-Backend-with-javaEE/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="Pos-System-Backend-with-javaEE" />
+        </element>
+      </element>
+      <element id="artifact" artifact-name="SaveCustomer" />
+    </root>
+  </artifact>
+</component>
