@@ -1,12 +1,13 @@
 package lk.ijse.gdse.service.custom.impl;
 
-import com.eshopper.eshopperapi.dao.DaoFactory;
-import com.eshopper.eshopperapi.dao.custom.CustomerDao;
-import com.eshopper.eshopperapi.dao.util.DaoTypes;
-import com.eshopper.eshopperapi.dto.CustomerDto;
-import com.eshopper.eshopperapi.entity.Customer;
-import com.eshopper.eshopperapi.service.custom.CustomerService;
-import com.eshopper.eshopperapi.service.util.FactoryConfiguration;
+
+import lk.ijse.gdse.dao.DaoFactory;
+import lk.ijse.gdse.dao.custom.CustomerDao;
+import lk.ijse.gdse.dao.util.DaoTypes;
+import lk.ijse.gdse.dto.CustomerDto;
+import lk.ijse.gdse.entity.Customer;
+import lk.ijse.gdse.service.custom.CustomerService;
+import lk.ijse.gdse.service.util.FactoryConfiguration;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -19,8 +20,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public boolean save(CustomerDto dto) throws RuntimeException{
-//        System.out.println("service: save");
-
         Customer customer = new Customer();
         customer.setId(dto.getId());
         customer.setName(dto.getName());

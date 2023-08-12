@@ -1,11 +1,11 @@
 package lk.ijse.gdse.service;
 
 
-import com.eshopper.eshopperapi.service.custom.impl.CustomerServiceImpl;
-import com.eshopper.eshopperapi.service.custom.impl.ItemServiceImpl;
-import com.eshopper.eshopperapi.service.custom.impl.OrderDetailsServiceImpl;
-import com.eshopper.eshopperapi.service.custom.impl.OrderServiceImpl;
-import com.eshopper.eshopperapi.service.util.ServiceTypes;
+import lk.ijse.gdse.service.custom.impl.CustomerServiceImpl;
+import lk.ijse.gdse.service.custom.impl.ItemServiceImpl;
+import lk.ijse.gdse.service.custom.impl.OrderDetailsServiceImpl;
+import lk.ijse.gdse.service.custom.impl.OrderServiceImpl;
+import lk.ijse.gdse.service.util.ServiceTypes;
 
 public class ServiceFactory {
     private static ServiceFactory instance;

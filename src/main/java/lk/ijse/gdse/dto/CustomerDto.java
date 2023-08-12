@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomerDto implements Serializable {
+public class CustomerDto implements Serializable, SuperDto {
     private String id;
     private String name;
     private String address;
