@@ -6,9 +6,12 @@
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
           <element id="module-output" name="Pos-System-Backend-with-javaEE" />
+          <element id="module-output" name="BackEnd" />
         </element>
+        <element id="directory" name="lib" />
       </element>
       <element id="artifact" artifact-name="SaveCustomer" />
+      <element id="javaee-facet-resources" facet="BackEnd/web/Web" />
     </root>
   </artifact>
 </component>
