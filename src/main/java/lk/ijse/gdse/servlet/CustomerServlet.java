@@ -6,6 +6,9 @@ import jakarta.json.JsonReader;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import lk.ijse.gdse.dto.CustomerDto;
+import lk.ijse.gdse.service.ServiceFactory;
+import lk.ijse.gdse.service.custom.CustomerService;
+import lk.ijse.gdse.service.util.ServiceTypes;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -25,103 +28,182 @@ public class CustomerServlet extends HttpServlet {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/thogakade";
     private static final String DB_USER = "root";
     private static final String DB_PASS = "1234";
+    private CustomerService customerService;
+    private Jsonb jsonb;
+
+    @Override
+    public void init() throws ServletException {
+        customerService = ServiceFactory.getInstance().getService(ServiceTypes.CUSTOMER_SERVICE);
+        jsonb = JsonbBuilder.create();
+    }
+
 
 //    private Connection connection ;
+
+//    @Override
+//    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        System.out.println("do-post");
+//        try {
+//            Class.forName("com.mysql.cj.jdbc.Driver");
+//            Connection connection =  DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+//            System.out.println("connection oky");
+//            String contentType = req.getContentType();
+//            System.out.println(contentType);
+//
+//            Jsonb jsonb = JsonbBuilder.create();
+//            CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
+//
+//            PreparedStatement ps = connection.prepareStatement(sql);
+//            ps.setString(1,customerDto.getId());
+//            ps.setString(2,customerDto.getName());
+//            ps.setString(3,customerDto.getAddress());
+//            ps.setDouble(4, customerDto.getSalary());
+//            int i = ps.executeUpdate();
+//            if (i>0){
+//                System.out.println("added oky");
+//            }else {
+//                System.out.println("added fail");
+//            }
+//        } catch (SQLException |ClassNotFoundException| RuntimeException e) {
+//            e.printStackTrace();
+//        }
+////        if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
+////            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+////
+////        }
+////
+////            try {
+////                Jsonb jsonb = JsonbBuilder.create();
+////                CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
+////
+////                PreparedStatement ps = connection.prepareStatement(sql);
+////                ps.setString(1,customerDto.getId());
+////                ps.setString(2,customerDto.getName());
+////                ps.setString(3,customerDto.getAddress());
+////                ps.setDouble(4,customerDto.getSalary());
+////                System.out.println("set oky");
+//////                if(ps.executeUpdate() < 1){
+//////                    System.out.println("failed");
+//////                }
+//////
+//////                //the created json is sent to frontend
+//////                resp.setContentType("application/json");
+//////                jsonb.toJson(customerDto,resp.getWriter());
+////
+////            } catch (SQLException | RuntimeException e) {
+////                System.out.println(e.getMessage());
+////            }
+//
+//    }
+//
+//    @Override
+//    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        System.out.println("sdggf");
+//    }
+//
+//}
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    System.out.println("do-get");
+    if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
+        resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    } else {
+        try {
+            CustomerDto customerDto = new CustomerDto();
+            customerDto.setId(req.getParameter("id"));
+            CustomerDto view = customerService.view(customerDto);
+            if (view != null) {
+                System.out.println("Customer exists");
+                String json = JsonbBuilder.create().toJson(view);  // Convert the customerDto to JSON using JSON-B (Yasson)
+                resp.setContentType("application/json");
+                PrintWriter writer = resp.getWriter();
+                writer.print(json);
+                writer.flush();
+                writer.close();
+            } else {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Customer is not exists");
+            }
+        } catch (RuntimeException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        }
+    }
+}
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         System.out.println("do-post");
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection connection =  DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
-            System.out.println("connection oky");
-            String contentType = req.getContentType();
-            System.out.println(contentType);
-
-            Jsonb jsonb = JsonbBuilder.create();
-            CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
-
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1,customerDto.getId());
-            ps.setString(2,customerDto.getName());
-            ps.setString(3,customerDto.getAddress());
-            ps.setDouble(4, customerDto.getSalary());
-            int i = ps.executeUpdate();
-            if (i>0){
-                System.out.println("added oky");
-            }else {
-                System.out.println("added fail");
+        if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
+            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        } else {
+            try {
+                CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
+                validate(customerDto);
+                boolean save = customerService.save(customerDto);
+                if (save) {
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    System.out.println("Data saved successfully.");
+                } else {
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to save data.");
+                }
+            } catch (RuntimeException e) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             }
-        } catch (SQLException |ClassNotFoundException| RuntimeException e) {
-            e.printStackTrace();
         }
-//        if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
-//            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-//
-//        }
-//
-//            try {
-//                Jsonb jsonb = JsonbBuilder.create();
-//                CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
-//
-//                PreparedStatement ps = connection.prepareStatement(sql);
-//                ps.setString(1,customerDto.getId());
-//                ps.setString(2,customerDto.getName());
-//                ps.setString(3,customerDto.getAddress());
-//                ps.setDouble(4,customerDto.getSalary());
-//                System.out.println("set oky");
-////                if(ps.executeUpdate() < 1){
-////                    System.out.println("failed");
-////                }
-////
-////                //the created json is sent to frontend
-////                resp.setContentType("application/json");
-////                jsonb.toJson(customerDto,resp.getWriter());
-//
-//            } catch (SQLException | RuntimeException e) {
-//                System.out.println(e.getMessage());
-//            }
-
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("sdggf");
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("do-put");
+        if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
+            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        } else {
+            try {
+                CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
+                validate(customerDto);
+                boolean update = customerService.update(customerDto);
+                if (update) {
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    System.out.println("Data updated successfully.");
+                } else {
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to update data.");
+                }
+            } catch (RuntimeException e) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            }
+        }
     }
-//    @Override
-//    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//        try {
-//            Class.forName(getServletContext().getInitParameter("mysql-driver"));
-//            String username = getServletContext().getInitParameter("db-user");
-//            String password = getServletContext().getInitParameter("db-pw");
-//            String url = getServletContext().getInitParameter("db-url");
-//            this.connection = DriverManager.getConnection(url,username,password);
-//
-//        } catch (ClassNotFoundException | SQLException ex) {
-//            throw new RuntimeException(ex);
-//        }
-//        JsonReader reader = Json.createReader(req.getReader());
-//        JsonObject jsonObject = reader.readObject();
-//        String id = jsonObject.getString("id");
-//        String name = jsonObject.getString("name");
-//        String address = jsonObject.getString("address");
-//        String salary = String.valueOf(jsonObject.getInt("salary"));
-//        try {
-//            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE customer SET name = ? , address = ? , salary = ? WHERE id = ?");
-//            preparedStatement.setObject(1,name);
-//            preparedStatement.setObject(2,address);
-//            preparedStatement.setObject(3,salary);
-//            preparedStatement.setObject(4,id);
-//            int i = preparedStatement.executeUpdate();
-//            if (i>1){
-//                System.out.println("updated");
-//                PrintWriter writer = resp.getWriter();
-//                writer.write("updated successfully");
-//            }
-//
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-    
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("do-delete");
+        if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
+            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        } else {
+            try {
+                CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
+                boolean delete = customerService.delete(customerDto);
+                if (delete) {
+                    resp.setStatus(HttpServletResponse.SC_OK); // 200 status code for success
+                    System.out.println("Data deleted successfully.");
+                } else {
+                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete data.");
+                }
+            } catch (RuntimeException e) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            }
+        }
+    }
+
+    private void validate(CustomerDto customerDto) throws RuntimeException {
+        System.out.println(customerDto);
+        if (customerDto.getId() == null || !customerDto.getId().matches("^C(00[1-9]|0[1-9]\\d|[1-9]\\d{2})$")) {
+            throw new RuntimeException("Invalid customer id!");
+        } else if (customerDto.getName() == null || !customerDto.getName().matches("^[A-Za-z]+(?:\\s[A-Za-z]+)*$")) {
+            throw new RuntimeException("Invalid customer name!");
+        } else if (customerDto.getAddress() == null || !customerDto.getAddress().matches("^[A-Za-z]+(?:\\s[A-Za-z]+)*$")) {
+            throw new RuntimeException("Invalid customer city!");
+        } else if (!Pattern.compile("^[0-9]+\\.?[0-9]*$").matcher(customerDto.getSalary().toString()).matches()) {
+            throw new RuntimeException("Invalid customer salary!");
+        }
+    }
 }
