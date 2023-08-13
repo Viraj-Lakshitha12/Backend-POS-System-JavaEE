@@ -69,6 +69,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
         System.out.println("do-post");
         if (req.getContentType() == null || !req.getContentType().toLowerCase().startsWith("application/json")) {
             resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            System.out.println("aul");
         } else {
             try {
                 CustomerDto customerDto = jsonb.fromJson(req.getReader(), CustomerDto.class);
